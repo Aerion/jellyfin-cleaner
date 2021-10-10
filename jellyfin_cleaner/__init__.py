@@ -30,6 +30,7 @@ parser.add_argument(
     "--radarr-base-url", type=str, help="Radarr base url", required=True
 )
 parser.add_argument("--radarr-api-key", type=str, help="Radarr api key", required=True)
+parser.add_argument("-n", "--dry-run", help="Dry-run", action="store_true")
 args = parser.parse_args()
 
 jellyfin_headers = {
@@ -71,14 +72,19 @@ radarr_movies_to_delete = [
     if radarr_item["imdbId"] in movies_imdb_ids_to_clean
 ]
 
-requests.delete(
-    urllib.parse.urljoin(args.radarr_base_url, "api/v3/movie/editor"),
-    json={
-        "movieIds": [radarr_item["id"] for radarr_item in radarr_movies_to_delete],
-        "deleteFiles": True,
-    },
-    params={"apiKey": args.radarr_api_key},
-)
+if args.dry_run:
+    logging.info(
+        f"Dry-run - Would have removed from Radarr the movies {[radarr_item['title'] for radarr_item in radarr_movies_to_delete]}"
+    )
+else:
+    requests.delete(
+        urllib.parse.urljoin(args.radarr_base_url, "api/v3/movie/editor"),
+        json={
+            "movieIds": [radarr_item["id"] for radarr_item in radarr_movies_to_delete],
+            "deleteFiles": True,
+        },
+        params={"apiKey": args.radarr_api_key},
+    )
 
 for radarr_movie in radarr_movies_to_delete:
     logging.debug(
