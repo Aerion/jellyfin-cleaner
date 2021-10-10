@@ -8,7 +8,7 @@ import logging
 
 
 logging.basicConfig()
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 
 
 parser = argparse.ArgumentParser(description="Clean Jellyfin items to delete")
